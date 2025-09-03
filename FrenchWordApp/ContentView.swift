@@ -3,7 +3,7 @@
 //  FrenchWordApp
 //
 //  Created by Dave Cassidy on 9/3/25.
-//
+//  Grok assisted in planning and producing
 
 import SwiftUI
 
