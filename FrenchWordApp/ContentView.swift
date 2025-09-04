@@ -9,10 +9,10 @@ import SwiftUI
 
 struct ContentView: View {
     // @State manages a single Word, updated when the user taps "New Word"
-    @State private var currentWord: Word
+    @State private var currentWord: Word // @State allows changes to this variable to be tracked
 
-    // Static list of sample words, suing 'let'because it won't change after initialization
-    private let sampleWords = [
+    // Static list of sample words, suing 'let' because it won't change after initialization
+    private let sampleWords = [          // let creates constants
         Word(french: "bonjour", english: "hello"),
         Word(french: "au revoir", english: "goodbye"),
         Word(french: "merci", english: "thank you"),
@@ -22,6 +22,8 @@ struct ContentView: View {
     // Initializer to set default currentWord (outside of initialization of sampleWords)
     init() {
         // Set initial word safely, avoiding force-unwrap (!), meaning (what exactly?)
+        // The actual value of currentWord is set when in the @State wrapper by referring
+        // to currentWord with a preceeding underscore _currenWord
         _currentWord = State(initialValue: sampleWords.randomElement() ?? Word(french: "bonjour", english: "hello"))
     }
     
