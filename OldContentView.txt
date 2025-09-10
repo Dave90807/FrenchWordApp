@@ -1,8 +1,4 @@
 // ContentView.swift
-// FrenchWordApp
-// Created by Dave Cassidy on 9/3/25.
-// Grok assisted in planning and producing
-
 import SwiftUI
 
 struct ContentView: View {
@@ -17,12 +13,8 @@ struct ContentView: View {
         Word(french: "bonjour", english: "hello"),
         Word(french: "au revoir", english: "goodbye"),
         Word(french: "merci", english: "thank you"),
-        Word(french: "chien", english: "dog"),
-        Word(french: "elle", english: "she"),
-        Word(french: "bonbon", english: "candy"),
-        Word(french: "voiture", english: "car"),
-        Word(french: "camion", english: "truck"),
-        Word(french: "pont", english: "bridge")    ]
+        Word(french: "chien", english: "dog")
+    ]
     
     init() {
         _currentWord = State(initialValue: Word(french: "bonjour", english: "hello"))
@@ -43,8 +35,6 @@ struct ContentView: View {
                 answers.append(Answer(wordId: currentWord.id, isCorrect: isCorrect ?? false, timestamp: Date()))
                 saveAnswers()
                 userInput = ""
-                print("Check Answer: Added answer for \(currentWord.french), isCorrect: \(isCorrect ?? false)")
-                // Q: Why consistent wordId? A: Matches Answer struct’s wordId, like Task.id in ToDoList
             }
             .padding()
             .background(Color.blue)
@@ -59,7 +49,6 @@ struct ContentView: View {
                 saveCurrentWord()
                 userInput = ""
                 isCorrect = nil
-                print("New Word: Selected \(currentWord.french)")
             }
             .padding()
             .background(Color.blue)
@@ -68,41 +57,24 @@ struct ContentView: View {
         }
         .padding()
         .onAppear {
-            print("Starting .onAppear")
-            // Temporary reset to clear corrupted data (remove after testing)
-            currentWordData = Data()
-            answerData = Data()
             loadAnswers()
-            print("currentWordData size: \(currentWordData.count) bytes")
-            if !currentWordData.isEmpty {
-                do {
-                    let decodedWord = try JSONDecoder().decode(Word.self, from: currentWordData)
-                    print("Decoded word: \(decodedWord.french) (id: \(decodedWord.id))")
-                    currentWord = decodedWord
-                } catch {
-                    print("Failed to decode currentWord: \(error.localizedDescription)")
-                    currentWordData = Data() // Clear invalid data
-                    currentWord = sampleWords.randomElement() ?? Word(french: "bonjour", english: "hello")
-                }
+            if let decodedWord = try? JSONDecoder().decode(Word.self, from: currentWordData), sampleWords.contains(where: { $0.id == decodedWord.id }) {
+                currentWord = decodedWord
             } else {
-                print("No saved word data, using random")
                 currentWord = sampleWords.randomElement() ?? Word(french: "bonjour", english: "hello")
             }
             saveCurrentWord()
-            print("Finished .onAppear")
             // Q: Why .onAppear? A: Ensures currentWord is initialized before accessing sampleWords
             // Q: Why no UI glitch? A: SwiftUI renders after .onAppear, so currentWord updates before display
-            // Q: Why eligibility.plist error? A: Simulator system file issue, doesn’t block functionality
-            // Q: Why clear currentWordData? A: Removes corrupted data from earlier code versions
+            // Q: Why eligibility.plist error? A: Simulator system file issue, likely triggered by breakpoint
         }
     }
     
     private func saveCurrentWord() {
         do {
             let encoded = try JSONEncoder().encode(currentWord)
-            print("Encoded currentWord: \(currentWord.french), size: \(encoded.count) bytes")
             currentWordData = encoded
-            print("Saved currentWord to @AppStorage: \(currentWord.french) (id: \(currentWord.id))")
+            print("Saved currentWord: \(currentWord)")
         } catch {
             print("Error saving currentWord: \(error.localizedDescription)")
         }
@@ -111,9 +83,8 @@ struct ContentView: View {
     private func saveAnswers() {
         do {
             let encoded = try JSONEncoder().encode(answers)
-            print("Encoded answers: \(answers.count) entries")
             answerData = encoded
-            print("Saved answers to @AppStorage: \(answers.count) entries")
+            print("Saved answers: \(answers)")
         } catch {
             print("Error saving answers: \(error.localizedDescription)")
         }
@@ -124,12 +95,12 @@ struct ContentView: View {
             if !answerData.isEmpty {
                 let decoded = try JSONDecoder().decode([Answer].self, from: answerData)
                 answers = decoded
-                print("Loaded answers: \(answers.count) entries")
+                print("Loaded answers: \(answers)")
             } else {
                 print("No answers data to load")
             }
         } catch {
-            print("Error loading answers: \(error.localizedDescription)")
+            print("Loading answers failed: \(error.localizedDescription)")
             answers = []
         }
     }
